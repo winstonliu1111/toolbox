@@ -17,6 +17,8 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -24,15 +26,29 @@ import (
 // httpServCmd represents the httpServ command
 var httpServCmd = &cobra.Command{
 	Use:   "httpServ",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "serve up a message at a given port",
+	Long: `httpServ -m [message] [port]
+	
+	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("httpServ called")
+		if len(args) != 1 {
+			fmt.Println("This command expects only 1 mandatory argument for the port number")
+			return
+		}
+
+		port, err := strconv.Atoi(args[0])
+		if err != nil || (port <= 0 && port >= 65535) {
+			fmt.Println("cannot convert passed arg to a port number in (0, 65535]")
+			return
+		}
+
+		message, _ := cmd.Flags().GetString("message")
+
+		// set up a server at localhost:port/ returning message
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "%s\n", message)
+		})
+		http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 	},
 }
 
@@ -48,4 +64,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// httpServCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	httpServCmd.Flags().StringP("message", "m", "ok", "set your custom message")
 }
