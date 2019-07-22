@@ -14,3 +14,6 @@
 # dep relatedr
 Gopkg.lock
 vendor
+
+# dont' check in build artifacts
+release
