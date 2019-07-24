@@ -25,17 +25,12 @@ import (
 
 // httpServCmd represents the httpServ command
 var httpServCmd = &cobra.Command{
-	Use:   "httpServ",
+	Use:   "httpServ [port]",
 	Short: "serve up a message at a given port",
 	Long: `httpServ -m [message] [port]
-	
 	`,
+	Args: cobra.ExactValidArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			fmt.Println("This command expects only 1 mandatory argument for the port number")
-			return
-		}
-
 		port, err := strconv.Atoi(args[0])
 		if err != nil || (port <= 0 && port >= 65535) {
 			fmt.Println("cannot convert passed arg to a port number in (0, 65535]")
